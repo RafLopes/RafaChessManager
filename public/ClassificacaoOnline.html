@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificação Online · Clube de Xadrez Erbo Stenzel</title>
+    <script src="js/tema.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link href="css/tema.css" rel="stylesheet">
+</head>
+<body data-pagina="online">
+    <header class="page-hero">
+        <div class="container d-flex align-items-center gap-3">
+            <div class="hero-icon"><i class="bi bi-bar-chart"></i></div>
+            <div>
+                <h1>Copa Alexandre Direne</h1>
+                <p>Classificação online até a etapa <strong id="numero-etapa">...</strong></p>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main container">
+        <div class="card">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span><i class="bi bi-trophy"></i>Classificação</span>
+                <div class="d-flex gap-2 no-print">
+                    <a href="GerenciarEtapasOnline.html" style="display: none;" id="gerenciar-etapas-link" class="btn btn-sm btn-outline-secondary"><i class="bi bi-sliders"></i><span class="d-none d-sm-inline ms-1">Gerenciar etapas</span></a>
+                    <button id="atualizar-dados" class="btn btn-sm btn-primary"><i class="bi bi-arrow-repeat me-1"></i>Atualizar<span class="d-none d-sm-inline"> do Chess.com</span></button>
+                </div>
+            </div>
+            <div class="card-body border-bottom progress-container" style="display: none;">
+                <div class="small mb-1">Buscando resultados no Chess.com...</div>
+                <div class="progress" role="progressbar" aria-label="Progresso da atualização">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" style="width: 0%;background:var(--xd-gold)"></div>
+                </div>
+            </div>
+            <div id="podioOnline" class="card-body pb-0"></div>
+            <div class="table-wrap">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Pos.</th>
+                            <th>Jogador</th>
+                            <th class="text-end">Pontuação</th>
+                            <th class="text-end">Torneios</th>
+                            <th class="text-end">Vitórias</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classificacao-tbody">
+                        <tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm me-2"></div>Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/classificacaoonline.js"></script>
+    <script>
+        // Verificar autenticação para mostrar botão de gerenciar etapas
+        firebase.auth().onAuthStateChanged(function(user) {
+            const gerenciarLink = document.getElementById('gerenciar-etapas-link');
+            if (user) {
+                gerenciarLink.style.display = 'inline-block';
+            } else {
+                gerenciarLink.style.display = 'none';
+            }
+        });
+
+        // Carregar etapa da nova coleção n_etapas_online
+        async function carregarNumeroEtapaNew() {
+            try {
+                const db = firebase.firestore();
+                const etapaDoc = await db.collection('n_etapas_online').doc('etapa-atual').get();
+                if (etapaDoc.exists) {
+                    const dados = etapaDoc.data();
+                    const numeroEtapa = dados.numero;
+                    document.getElementById('numero-etapa').textContent = numeroEtapa;
+                } else {
+                    console.log('Documento etapa não encontrado');
+                    document.getElementById('numero-etapa').textContent = '?';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar número da etapa:', error);
+                document.getElementById('numero-etapa').textContent = '?';
+            }
+        }
+
+        // Carregar etapa quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarNumeroEtapaNew();
+        });
+    </script>
+</body>
+</html>

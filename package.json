@@ -1,0 +1,16 @@
+{
+  "name": "rafa-chess-manager",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de torneios de xadrez com Firebase",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "emuladores": "node scripts/emuladores.mjs",
+    "seed": "node scripts/seed-emulador.mjs",
+    "copiar-dados-reais": "node scripts/copiar-dados-reais-para-emulador.mjs"
+  },
+  "dependencies": {
+    "firebase": "^11.2.0",
+    "firebase-admin": "^13.0.2"
+  }
+}

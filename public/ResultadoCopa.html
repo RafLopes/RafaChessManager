@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado da Copa · Clube de Xadrez Erbo Stenzel</title>
+    <script src="js/tema.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link href="css/tema.css" rel="stylesheet">
+</head>
+<body data-pagina="torneios">
+    <header class="page-hero">
+        <div class="container d-flex align-items-center gap-3">
+            <div class="hero-icon"><i class="bi bi-award"></i></div>
+            <div>
+                <h1>Copa <span id="anoCopa"></span></h1>
+                <p>Ranking acumulado dos torneios válidos para a Copa do ano.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main container">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-trophy"></i>Classificação geral</span>
+                        <button id="atualizarButton" class="btn btn-sm btn-outline-secondary no-print"><i class="bi bi-arrow-clockwise me-1"></i>Atualizar</button>
+                    </div>
+                    <div id="resultadosCopa" class="resultados-copa">
+                        <div class="text-center py-5"><div class="spinner-border text-secondary"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="bi bi-calendar-event"></i>Etapas da Copa</div>
+                    <div id="torneiosLista" class="torneios-lista"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-question-circle"></i>Como funciona a pontuação</div>
+                    <div class="card-body small">
+                        <p class="mb-2">Em cada etapa o jogador soma os <strong>pontos feitos no torneio</strong> mais um bônus pela colocação:</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-warning">1º +6</span>
+                            <span class="badge text-bg-secondary">2º +4</span>
+                            <span class="badge text-bg-secondary">3º +3</span>
+                            <span class="badge text-bg-light border">4º +2</span>
+                            <span class="badge text-bg-light border">5º +1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/ResultadoCopa.js"></script>
+    <script>document.getElementById('anoCopa').textContent = new Date().getFullYear();</script>
+</body>
+</html>

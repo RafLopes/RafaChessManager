@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clube de Xadrez Erbo Stenzel</title>
+    <script src="js/tema.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link href="css/tema.css" rel="stylesheet">
+</head>
+<body data-pagina="inicio">
+    <header class="page-hero">
+        <div class="container d-flex align-items-center gap-3">
+            <div class="hero-icon"><i class="bi bi-trophy"></i></div>
+            <div>
+                <h1>Clube de Xadrez Erbo Stenzel</h1>
+                <p>Torneios, ratings e a Copa do clube em um só lugar.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main container">
+        <!-- Indicadores -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100">
+                    <div class="d-flex justify-content-between"><span class="stat-rotulo">Jogadores</span><i class="bi bi-people stat-icone"></i></div>
+                    <div class="stat-valor num" id="totalJogadores">—</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100">
+                    <div class="d-flex justify-content-between"><span class="stat-rotulo">Torneios disputados</span><i class="bi bi-flag stat-icone"></i></div>
+                    <div class="stat-valor num" id="totalTorneios">—</div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card stat-card h-100" id="cardTorneioAberto">
+                    <div class="d-flex justify-content-between"><span class="stat-rotulo">Torneio em aberto</span><i class="bi bi-hourglass-split stat-icone"></i></div>
+                    <div id="torneioAberto" class="mt-1"><span class="placeholder col-6"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Atalhos -->
+            <div class="col-lg-8">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-people"></i>Jogadores</div>
+                            <div class="card-body p-2">
+                                <a class="atalho" href="ListaPlayers.html"><span class="atalho-icone"><i class="bi bi-list-ol"></i></span><span><span class="atalho-titulo d-block">Lista de jogadores</span><span class="atalho-desc">Ranking por rating, busca e CSV</span></span></a>
+                                <a class="atalho" href="HistoricoJogador.html"><span class="atalho-icone"><i class="bi bi-graph-up"></i></span><span><span class="atalho-titulo d-block">Histórico do jogador</span><span class="atalho-desc">Evolução do rating e confrontos</span></span></a>
+                                <a class="atalho so-admin d-none" href="CadastroPlayers.html"><span class="atalho-icone"><i class="bi bi-person-plus"></i></span><span><span class="atalho-titulo d-block">Cadastrar jogador</span><span class="atalho-desc">Novo membro do clube</span></span></a>
+                                <a class="atalho so-admin d-none" href="RemoverPlayers.html"><span class="atalho-icone"><i class="bi bi-person-x"></i></span><span><span class="atalho-titulo d-block">Remover jogador</span><span class="atalho-desc">Excluir um cadastro</span></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-trophy"></i>Torneios</div>
+                            <div class="card-body p-2">
+                                <a class="atalho" href="VisualizarTorneio.html"><span class="atalho-icone"><i class="bi bi-eye"></i></span><span><span class="atalho-titulo d-block">Visualizar torneio</span><span class="atalho-desc">Rodadas e classificação final</span></span></a>
+                                <a class="atalho" href="ResultadoCopa.html"><span class="atalho-icone"><i class="bi bi-award"></i></span><span><span class="atalho-titulo d-block">Resultado da Copa</span><span class="atalho-desc">Ranking anual acumulado</span></span></a>
+                                <a class="atalho so-admin d-none" href="CadastroTorneio.html" data-requer="sem-aberto"><span class="atalho-icone"><i class="bi bi-plus-circle"></i></span><span><span class="atalho-titulo d-block">Cadastrar torneio</span><span class="atalho-desc">Criar um novo torneio</span></span></a>
+                                <a class="atalho so-admin d-none" href="EditarTorneio.html" data-requer="aberto"><span class="atalho-icone"><i class="bi bi-pencil-square"></i></span><span><span class="atalho-titulo d-block">Editar torneio</span><span class="atalho-desc">Ajustar dados e participantes</span></span></a>
+                                <a class="atalho so-admin d-none" href="JogarTorneio.html" data-requer="aberto"><span class="atalho-icone"><i class="bi bi-play-circle"></i></span><span><span class="atalho-titulo d-block">Jogar torneio</span><span class="atalho-desc">Emparceirar e lançar resultados</span></span></a>
+                                <a class="atalho so-admin d-none" href="TorneioManual.html"><span class="atalho-icone"><i class="bi bi-journal-text"></i></span><span><span class="atalho-titulo d-block">Torneio manual</span><span class="atalho-desc">Lançar torneio jogado fora do sistema</span></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-globe2"></i>Torneios online</div>
+                            <div class="card-body p-2">
+                                <a class="atalho" href="ClassificacaoOnline.html"><span class="atalho-icone"><i class="bi bi-bar-chart"></i></span><span><span class="atalho-titulo d-block">Classificação online</span><span class="atalho-desc">Copa Alexandre Direne (Chess.com)</span></span></a>
+                                <a class="atalho" href="LinksEtapas.html"><span class="atalho-icone"><i class="bi bi-link-45deg"></i></span><span><span class="atalho-titulo d-block">Etapas do torneio</span><span class="atalho-desc">Links e datas das etapas</span></span></a>
+                                <a class="atalho so-admin d-none" href="GerenciarEtapasOnline.html"><span class="atalho-icone"><i class="bi bi-sliders"></i></span><span><span class="atalho-titulo d-block">Gerenciar etapas</span><span class="atalho-desc">Definir a etapa atual</span></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header"><i class="bi bi-clock-history"></i>Últimos torneios</div>
+                            <ul class="list-group list-group-flush lista-torneios" id="ultimosTorneios">
+                                <li class="list-group-item"><span class="placeholder col-8"></span></li>
+                                <li class="list-group-item"><span class="placeholder col-6"></span></li>
+                                <li class="list-group-item"><span class="placeholder col-7"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top rating -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-star"></i>Top 10 do rating</span>
+                        <a href="ListaPlayers.html" class="small">Ver todos</a>
+                    </div>
+                    <ul class="list-group list-group-flush" id="topRating">
+                        <li class="list-group-item"><span class="placeholder col-9"></span></li>
+                        <li class="list-group-item"><span class="placeholder col-7"></span></li>
+                        <li class="list-group-item"><span class="placeholder col-8"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+    // Painel do menu principal (somente leitura)
+    document.addEventListener('DOMContentLoaded', async function () {
+        const db = firebase.firestore();
+        const e = UI.escapar;
+
+        try {
+            const [playersSnap, torneiosSnap] = await Promise.all([
+                db.collection('players').get(),
+                db.collection('torneio').get()
+            ]);
+
+            const players = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const torneios = torneiosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const finalizados = torneios.filter(t => t.Resultado).sort((a, b) => String(b.data).localeCompare(String(a.data)));
+            const aberto = torneios.find(t => !t.Resultado);
+
+            document.getElementById('totalJogadores').textContent = players.length;
+            document.getElementById('totalTorneios').textContent = finalizados.length;
+
+            // Torneio em aberto
+            const abertoDiv = document.getElementById('torneioAberto');
+            if (aberto) {
+                abertoDiv.innerHTML = `
+                    <div class="fw-semibold fs-5">${e(aberto.nome)}</div>
+                    <div class="small text-body-secondary mb-2">
+                        <i class="bi bi-calendar3 me-1"></i>${UI.formatarData(aberto.data)}
+                        · ${aberto.Formato === 'schuring' ? 'Schuring' : 'Suíço'}
+                        · ${(aberto.jogadores || []).length} jogadores
+                        ${aberto.copa ? '· <span class="badge text-bg-warning">Copa</span>' : ''}
+                    </div>
+                    <a href="JogarTorneio.html" class="btn btn-sm btn-primary so-admin d-none"><i class="bi bi-play-fill me-1"></i>Jogar agora</a>
+                    <a href="EditarTorneio.html" class="btn btn-sm btn-outline-secondary so-admin d-none">Editar</a>`;
+                document.querySelectorAll('#torneioAberto .so-admin').forEach(el => el.classList.toggle('d-none', localStorage.getItem('userRole') !== 'admin'));
+            } else {
+                abertoDiv.innerHTML = `<div class="text-body-secondary">Nenhum torneio em andamento.</div>
+                    <a href="CadastroTorneio.html" class="btn btn-sm btn-primary mt-2 so-admin ${localStorage.getItem('userRole') === 'admin' ? '' : 'd-none'}"><i class="bi bi-plus-lg me-1"></i>Cadastrar torneio</a>`;
+            }
+
+            // Últimos torneios com campeão
+            const ultimos = document.getElementById('ultimosTorneios');
+            ultimos.innerHTML = finalizados.slice(0, 4).map(t => {
+                const campeao = t.Resultado[0];
+                const nomeCampeao = campeao ? (campeao.jogador ? campeao.jogador.nome : campeao.nome) : '—';
+                return `<li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                    <div class="text-truncate">
+                        <a href="VisualizarTorneio.html?id=${encodeURIComponent(t.id)}" class="fw-semibold text-decoration-none">${e(t.nome)}</a>
+                        <div class="small text-body-secondary">${UI.formatarData(t.data)} · 🏆 ${e(nomeCampeao)}</div>
+                    </div>
+                    ${t.copa ? '<span class="badge text-bg-warning">Copa</span>' : ''}
+                </li>`;
+            }).join('') || '<li class="list-group-item text-body-secondary">Nenhum torneio finalizado ainda.</li>';
+
+            // Top 10 rating
+            const top = [...players].sort((a, b) => b.Rating - a.Rating).slice(0, 10);
+            document.getElementById('topRating').innerHTML = top.map((p, i) => `
+                <li class="list-group-item d-flex align-items-center gap-3">
+                    <span class="pos-badge ${i < 3 ? 'pos-' + (i + 1) : ''}">${i + 1}</span>
+                    <a href="HistoricoJogador.html?id=${encodeURIComponent(p.id)}" class="flex-grow-1 text-decoration-none text-body">${e(p.Nome)}</a>
+                    <span class="fw-semibold num">${e(p.Rating)}</span>
+                </li>`).join('');
+        } catch (error) {
+            console.error('Erro ao carregar painel:', error);
+            UI.toast('Erro ao carregar os dados do painel.', 'danger');
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore do Clube de Xadrez Erbo Stenzel.
+//
+// - Leitura pública: o site mostra ranking, torneios e históricos para qualquer visitante.
+// - Gravação (criar, alterar, apagar) só para as contas de administrador listadas abaixo.
+//   Esconder botões no site não protege nada; quem decide o que pode ser gravado são estas regras.
+// - Qualquer coleção que não esteja listada aqui fica totalmente bloqueada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function ehAdmin() {
+      return request.auth != null && request.auth.uid in [
+        'TqevzZKRfZNgtVFlWGvvg4j1XrI2',   // Rafael
+        's3h9XBbCNbW3BPWXslSndRmeDID3',   // responsável do clube
+        'admin-teste-emulador'        // conta de teste que só existe no emulador local
+      ];
+    }
+
+    match /players/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /torneio/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /online/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /n_etapas_online/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /links_etapas/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+  }
+}

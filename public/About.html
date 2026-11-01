@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Sistema · Clube de Xadrez Erbo Stenzel</title>
+    <script src="js/tema.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link href="css/tema.css" rel="stylesheet">
+</head>
+<body>
+    <header class="page-hero">
+        <div class="container d-flex align-items-center gap-3">
+            <div class="hero-icon"><i class="bi bi-info-circle"></i></div>
+            <div>
+                <h1>Sobre o sistema</h1>
+                <p>Como funcionam os torneios, o rating e a Copa do clube.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-diagram-3"></i>Formatos de torneio</div>
+                    <div class="card-body">
+                        <h3 class="h6">Suíço</h3>
+                        <p class="small text-body-secondary">Na 1ª rodada os jogadores são ordenados por rating e a metade de cima enfrenta a de baixo. Nas seguintes, jogadores com a mesma pontuação se enfrentam, sem repetir adversários, equilibrando brancas e pretas. Com número ímpar, o BYE vai para o jogador de menor pontuação que ainda não o recebeu.</p>
+                        <h3 class="h6">Schuring (todos contra todos)</h3>
+                        <p class="small text-body-secondary mb-0">Todos os jogadores se enfrentam uma vez. As rodadas são geradas de uma só vez; com número ímpar, um jogador folga (BYE) em cada rodada.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-speedometer2"></i>Rating</div>
+                    <div class="card-body small">
+                        <p>O rating é atualizado ao encerrar cada torneio, pela fórmula Elo com <strong>K = 20</strong>, usando o rating de cada jogador no início do torneio:</p>
+                        <p class="text-center fs-6"><code>novo = atual + 20 × (resultado − esperado)</code></p>
+                        <p class="mb-0 text-body-secondary">Resultado: 1 (vitória), 0,5 (empate) ou 0 (derrota). Esperado: 1 / (1 + 10<sup>(rating adversário − seu rating) / 400</sup>). Partidas contra BYE não alteram o rating.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-sort-down"></i>Classificação e desempate</div>
+                    <div class="card-body small">
+                        <p>Vitória vale 1 ponto, empate 0,5 e BYE 1 ponto. Em caso de empate em pontos, a ordem é decidida por:</p>
+                        <ol class="mb-0">
+                            <li>Número de vitórias</li>
+                            <li>Sonneborn-Berger (soma dos pontos dos adversários vencidos + metade dos pontos dos adversários com quem empatou)</li>
+                            <li>Rating</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-award"></i>Copa anual</div>
+                    <div class="card-body small">
+                        <p>Torneios marcados como <strong>Copa</strong> no ano corrente somam pontos no ranking da Copa: os pontos feitos no torneio mais um bônus pela colocação.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-warning">1º +6</span>
+                            <span class="badge text-bg-secondary">2º +4</span>
+                            <span class="badge text-bg-secondary">3º +3</span>
+                            <span class="badge text-bg-light border">4º +2</span>
+                            <span class="badge text-bg-light border">5º +1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="bi bi-grid"></i>Páginas</div>
+                    <div class="card-body">
+                        <div class="row g-3 small">
+                            <div class="col-md-4">
+                                <div class="section-label mb-2">Jogadores</div>
+                                <ul class="list-unstyled mb-0">
+                                    <li><a href="ListaPlayers.html">Lista de jogadores</a> — ranking, busca e exportação CSV</li>
+                                    <li><a href="HistoricoJogador.html">Histórico do jogador</a> — gráfico do rating e confronto direto</li>
+                                    <li>Cadastrar / remover jogador <span class="badge text-bg-light border">admin</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="section-label mb-2">Torneios</div>
+                                <ul class="list-unstyled mb-0">
+                                    <li><a href="VisualizarTorneio.html">Visualizar torneio</a> — rodadas e classificação final</li>
+                                    <li><a href="ResultadoCopa.html">Resultado da Copa</a> — ranking anual</li>
+                                    <li>Cadastrar, editar, jogar e lançar torneio manual <span class="badge text-bg-light border">admin</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="section-label mb-2">Online</div>
+                                <ul class="list-unstyled mb-0">
+                                    <li><a href="ClassificacaoOnline.html">Classificação online</a> — Copa Alexandre Direne (Chess.com)</li>
+                                    <li><a href="LinksEtapas.html">Etapas</a> — datas e links</li>
+                                    <li>Gerenciar etapas <span class="badge text-bg-light border">admin</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/ui.js"></script>
+</body>
+</html>
