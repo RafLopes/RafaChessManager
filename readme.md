@@ -9,6 +9,10 @@ Sistema completo para gerenciamento de torneios de xadrez, com cálculo automát
 
 🔗 **Demo ao vivo**: https://rafatournament.web.app
 
+<p align="center">
+  <img src="docs/screenshots/inicio.png" alt="Página inicial do Rafa Chess Manager" width="900">
+</p>
+
 ### ✨ Destaques técnicos
 
 - **Algoritmos de emparceiramento** próprios: sistema Suíço e Schuring, com BYE automático e desempate Sonneborn-Berger
@@ -23,67 +27,89 @@ Sistema completo para gerenciamento de torneios de xadrez, com cálculo automát
 
 ## 📋 Índice
 
-- [Visão Geral](#visão-geral)
-- [Funcionalidades Principais](#funcionalidades-principais)
-- [Formatos de Torneio](#formatos-de-torneio)
-- [Gerenciamento de Jogadores](#gerenciamento-de-jogadores)
-- [Sistema de Ratings](#sistema-de-ratings)
-- [Copa Anual](#copa-anual)
-- [Instalação e Configuração](#instalação-e-configuração)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Guia de Uso](#guia-de-uso)
-- [Arquitetura Técnica](#arquitetura-técnica)
+- [Tour pelo sistema](#-tour-pelo-sistema)
+- [Formatos de Torneio](#-formatos-de-torneio)
+- [Sistema de Ratings](#-sistema-de-ratings)
+- [Copa Anual](#-copa-anual)
+- [Instalação e Configuração](#️-instalação-e-configuração)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Guia de Uso](#-guia-de-uso)
+- [Arquitetura Técnica](#-arquitetura-técnica)
 
 ---
 
-## 🎯 Visão Geral
+## 📸 Tour pelo sistema
 
-O Rafa Chess Manager é uma plataforma web moderna para gerenciamento completo de torneios de xadrez. Oferece suporte para múltiplos formatos de torneio, cálculo automático de ratings ELO, emparceiramento inteligente com critérios de desempate profissionais e acompanhamento de uma copa anual.
+> As imagens foram geradas no ambiente de testes local, com jogadores e torneios fictícios.
 
-O sistema foi desenvolvido com foco em facilitar a organização de torneios offline e online, com interface intuitiva para administradores e acompanhamento transparente de resultados para todos os participantes.
+### 🏠 Página inicial
 
----
+Um painel com tudo o que importa no clube: número de jogadores, torneios disputados, o torneio em aberto com atalho para jogar, o **Top 10 do rating** e atalhos para todas as telas.
 
-## 🚀 Funcionalidades Principais
+### 👥 Jogadores e histórico
 
-### 1. **Cadastro e Gerenciamento de Jogadores**
-- Cadastro de novos jogadores com: Nome, Idade, Rating inicial, Sexo
-- Visualização de todos os jogadores cadastrados
-- Edição de dados de jogadores
-- Remoção de jogadores com confirmação de segurança
-- Histórico individual: visualize todos os torneios e resultados de cada jogador
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/jogadores.png" alt="Lista de jogadores"></td>
+    <td width="50%"><img src="docs/screenshots/historico.png" alt="Histórico do jogador"></td>
+  </tr>
+  <tr>
+    <td><b>Lista de jogadores</b>: ranking por rating, ordenação por nome, ID ou rating e exportação para CSV.</td>
+    <td><b>Histórico do jogador</b>: gráfico da evolução do rating, maior rating, torneios disputados com a variação de cada um e confronto direto contra outro jogador.</td>
+  </tr>
+</table>
 
-### 2. **Criação e Gerenciamento de Torneios**
-- Criação de torneios com configuração personalizada
-- Seleção de jogadores participantes
-- Escolha de formato (Suíço ou Schuring)
-- Definição de datas dos torneios
-- Suporte para Copa Anual (flag separada)
-- Visualização e edição de torneios em aberto
+### ➕ Criar um torneio
 
-### 3. **Execução de Torneios Online**
-- Interface intuitiva para registrar resultados em tempo real
-- Suporte para BYE automático (quando número de jogadores é ímpar)
-- Rounds automáticos com emparceiramento inteligente
-- Validação de dados antes de confirmar rodadas
+<p align="center">
+  <img src="docs/screenshots/cadastro-torneio.png" alt="Cadastro de torneio" width="900">
+</p>
 
-### 4. **Entrada Manual de Resultados (Torneio Manual)**
-- Registro de resultados de torneios já realizados offline
-- Interface clara para cada rodada e partida
-- Seleção de jogadores com BYE automático
-- Cálculo de ratings e Sonneborn-Berger apenas após confirmação final
+Escolha o formato (**Suíço** ou **Schuring**), o número de rodadas, a data e se o torneio vale para a Copa. Os participantes são selecionados com um clique, com busca por nome, e aparecem na ordem de inscrição.
 
-### 5. **Cálculo Automático de Ratings**
-- Fórmula ELO profissional (K=20)
-- Cálculo automático após cada torneio
-- Atualização em tempo real na base de dados
-- Visualização de variações de rating
+### ♟️ Jogar o torneio
 
-### 6. **Copa Anual**
-- Agregação automática de resultados de torneios marcados como "Copa"
-- Sistema de pontuação: 6pts (1º), 4pts (2º), 3pts (3º), 2pts (4º), 1pt (5º), 0 (6º+)
-- Ranking atualizado em tempo real
-- Filtro por ano automático baseado na data do torneio
+<p align="center">
+  <img src="docs/screenshots/jogar-torneio.png" alt="Emparceiramento e lançamento de resultados" width="900">
+</p>
+
+O sistema **emparceira cada rodada automaticamente** e dá o BYE quando o número de jogadores é ímpar. O organizador só clica no resultado de cada mesa (`1-0`, `½-½`, `0-1`) e a **classificação parcial** se atualiza na hora. Ao final, os ratings de todos são recalculados.
+
+### 🏆 Resultado final
+
+<p align="center">
+  <img src="docs/screenshots/visualizar-torneio.png" alt="Classificação final do torneio" width="900">
+</p>
+
+Pódio, classificação completa com pontos, vitórias, desempate **Sonneborn-Berger** e a variação de rating de cada jogador, além do histórico de partidas rodada a rodada. A página também tem versão para impressão.
+
+### 🥇 Copa anual
+
+<p align="center">
+  <img src="docs/screenshots/copa.png" alt="Ranking da Copa anual" width="900">
+</p>
+
+Os torneios marcados como Copa somam pontos ao longo do ano. A página mostra o ranking acumulado, as etapas (finalizadas e em andamento, com o campeão de cada uma) e a regra de pontuação.
+
+### 🌐 Torneios online (Chess.com)
+
+<p align="center">
+  <img src="docs/screenshots/classificacao-online.png" alt="Classificação dos torneios online" width="900">
+</p>
+
+Para as etapas jogadas no Chess.com, o sistema busca os resultados pela API e monta a classificação da **Copa Alexandre Direne**. Também há uma página com o calendário e os links de cada etapa.
+
+### 🌙 Tema escuro e celular
+
+<table>
+  <tr>
+    <td width="56%"><img src="docs/screenshots/inicio-escuro.png" alt="Tema escuro"></td>
+    <td width="22%"><img src="docs/screenshots/celular-copa.png" alt="Copa no celular"></td>
+    <td width="22%"><img src="docs/screenshots/celular-torneio.png" alt="Torneio no celular"></td>
+  </tr>
+</table>
+
+Tema claro e escuro (segue o sistema ou a escolha do usuário) e layout responsivo: dá para acompanhar a Copa e os resultados pelo celular.
 
 ---
 
@@ -99,36 +125,9 @@ O sistema foi desenvolvido com foco em facilitar a organização de torneios off
 ### **2. Schuring (Round-Robin Modificado)**
 - Todos os jogadores se enfrentam entre si (todos vs todos)
 - Máximo de precisão na classificação
-- Indicado para: Torneis com poucos participantes (até 8-10 jogadores)
+- Indicado para: Torneios com poucos participantes (até 8-10 jogadores)
 - **Critério de Desempate**: Sonneborn-Berger
 - **BYE**: Atribuído automaticamente quando número de jogadores é ímpar
-
----
-
-## 👥 Gerenciamento de Jogadores
-
-### Telas Disponíveis:
-
-#### **Cadastro de Jogadores** (`CadastroPlayers.html`)
-- Formulário para adicionar novos jogadores
-- Campos obrigatórios: Nome, Idade, Rating inicial, Sexo
-- Validação de entrada antes de salvar
-
-#### **Lista de Jogadores** (`ListaPlayers.html`)
-- Visualização de todos os jogadores cadastrados
-- Exibição de: Nome, Idade, Rating atual, Sexo
-- Busca e filtragem de jogadores
-- Acesso rápido ao histórico individual
-
-#### **Remover Jogadores** (`RemoverPlayers.html`)
-- Interface segura para remover jogadores
-- Confirmação antes de deletar
-- Aviso se jogador participa de torneios em aberto
-
-#### **Histórico do Jogador** (`HistoricoJogador.html`)
-- Visualização completa de todos os torneios que o jogador participou
-- Resultados, posição final e variação de rating
-- Estatísticas individuais
 
 ---
 
@@ -171,7 +170,7 @@ Onde:
    - 5º Lugar: 1 ponto
    - 6º+ Lugar: 0 pontos
 
-### Tela de Resultados** (`ResultadoCopa.html`)
+### Tela de Resultados (`ResultadoCopa.html`)
 - Ranking geral da copa anual
 - Lista de torneios realizados (ordenados por data)
 - Status de cada torneio (Finalizado/Em andamento)
