@@ -60,11 +60,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 let vitoriasdetorneio = 0;
 
                 const body = await getPlayerTournaments(username);
-                // Aceita múltiplos filtros (array) ou um filtro único (string)
-                const filters = Array.isArray(filter) ? filter : [filter];
-                const tournaments = body.finished.filter((t) => 
-                    filters.some(f => t.url.includes(f))
-                );
+                // Cada torneio do Chess.com conta separadamente, mesmo que dois tenham o mesmo
+                // número de etapa (ex.: as duas "Etapa 82" da VII Copa são válidas).
+                // As vitórias do Chess.com já incluem os BYEs (1 ponto cada).
+                const tournaments = body.finished.filter((t) => filter.test(t.url));
 
                 if (tournaments.length > 0) {
                     for (const t of tournaments) {
@@ -112,11 +111,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             const data = await response.json();
             const members = [...new Set([...data.weekly, ...data.monthly, ...data.all_time])].map(member => member.username);
 
-            // Obter resultados - aceita torneios com ambos os padrões
-            const results = await getResultByUser(members, [
-                'cxes-online-2025---vii',  // Primeira etapa (nome errado)
-                'cxes-online-2026---vii'   // Próximas etapas (nome correto)
-            ]);
+            // Etapas da VII Copa Alexandre Direne, com qualquer quantidade de traços no endereço:
+            //   cxes-online-2025---vii-copa-...  (primeira etapa, criada com o ano errado)
+            //   cxes-online-2026---vii-copa-...  (padrão)
+            //   cxes-online-2026-vii-copa-...    (algumas etapas criadas com um traço só)
+            // O "-vii-copa" exige o traço antes do "vii", então não pega a VI nem uma futura VIII.
+            const etapasDaCopa = /cxes-online-202[56]-+vii-copa-alexandre-direne/i;
+            const results = await getResultByUser(members, etapasDaCopa);
 
             // Salvar no Firestore
             const batch = db.batch();

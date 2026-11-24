@@ -7,7 +7,8 @@
   "scripts": {
     "emuladores": "node scripts/emuladores.mjs",
     "seed": "node scripts/seed-emulador.mjs",
-    "copiar-dados-reais": "node scripts/copiar-dados-reais-para-emulador.mjs"
+    "copiar-dados-reais": "node scripts/copiar-dados-reais-para-emulador.mjs",
+    "conferir-online": "node scripts/conferir-jogador-online.mjs"
   },
   "dependencies": {
     "firebase": "^11.2.0",
