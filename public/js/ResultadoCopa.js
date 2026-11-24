@@ -45,22 +45,11 @@ async function atualizarResultadosCopa() {
             if (torneio.Resultado && Array.isArray(torneio.Resultado)) {
                 console.log(`Total de ${torneio.Resultado.length} jogadores no torneio ${torneio.nome}`);
                 
-                // Ordenar resultados baseado no formato do torneio
-                let resultadosOrdenados;
-                if (torneio.Formato === 'suico') {
-                    // Para torneio suíço, ordenar por pontos e sonnenbornBerger
-                    resultadosOrdenados = [...torneio.Resultado]
-                        .sort((a, b) => {
-                            if (b.pontos === a.pontos) {
-                                return b.sonnenbornBerger - a.sonnenbornBerger;
-                            }
-                            return b.pontos - a.pontos;
-                        });
-                } else {
-                    // Para outros formatos (schuring), ordenar por pontos
-                    resultadosOrdenados = [...torneio.Resultado]
-                        .sort((a, b) => b.pontos - a.pontos);
-                }
+                // Usa a classificação oficial exatamente como foi gravada no encerramento do
+                // torneio (pontos > vitórias > Sonneborn-Berger > rating). Não reordenar aqui:
+                // a Copa precisa dar os pontos de posição a quem a página do torneio mostra
+                // naquela posição, inclusive o campeão.
+                const resultadosOrdenados = torneio.Resultado;
 
                 console.log('Ordem final do torneio:');
                 resultadosOrdenados.forEach((j, i) => {
