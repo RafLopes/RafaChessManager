@@ -1,111 +1,17 @@
-// Inicializar variáveis globais
-let torneiosDaCopa = [];
-let classificacaoGeral = new Map(); // Map para armazenar pontos por jogador
-
-// Função principal para atualizar os resultados
+// Página da Copa: busca as etapas no banco e desenha. A regra de pontuação está em copa.js.
 async function atualizarResultadosCopa() {
-    console.log('Iniciando atualização dos resultados da copa...');
     try {
-        // Limpar dados anteriores
-        torneiosDaCopa = [];
-        classificacaoGeral.clear();
-
-        // Pegar o ano atual
-        const anoAtual = new Date().getFullYear();
-        console.log(`Filtrando torneios de ${anoAtual}`);
-
         // Buscar todos os torneios com flag copa = true
         const torneiosSnapshot = await firebase.firestore()
             .collection('torneio')
             .where('copa', '==', true)
             .get();
 
-        console.log(`Encontrados ${torneiosSnapshot.docs.length} torneios da copa`);
+        const torneios = torneiosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const { torneiosDoAno, classificacao } = Copa.calcular(torneios, new Date().getFullYear());
 
-        // Processar cada torneio
-        for (const doc of torneiosSnapshot.docs) {
-            const torneio = {
-                id: doc.id,
-                ...doc.data()
-            };
-            
-            // Extrair o ano da data (formato yyyy-mm-dd)
-            const anoTorneio = torneio.data ? parseInt(torneio.data.substring(0, 4)) : null;
-            
-            // Pular torneios que não são do ano atual
-            if (anoTorneio !== anoAtual) {
-                console.log(`Torneio ${torneio.nome} (${anoTorneio}) é de outro ano, pulando...`);
-                continue;
-            }
-            
-            console.log(`\nProcessando torneio ${torneio.nome} (Formato: ${torneio.Formato || 'não especificado'}):`);
-            torneiosDaCopa.push(torneio);
-
-            // Se o torneio tem resultados, processar pontuação
-            if (torneio.Resultado && Array.isArray(torneio.Resultado)) {
-                console.log(`Total de ${torneio.Resultado.length} jogadores no torneio ${torneio.nome}`);
-                
-                // Usa a classificação oficial exatamente como foi gravada no encerramento do
-                // torneio (pontos > vitórias > Sonneborn-Berger > rating). Não reordenar aqui:
-                // a Copa precisa dar os pontos de posição a quem a página do torneio mostra
-                // naquela posição, inclusive o campeão.
-                const resultadosOrdenados = torneio.Resultado;
-
-                console.log('Ordem final do torneio:');
-                resultadosOrdenados.forEach((j, i) => {
-                    const nomeJogador = j.jogador ? j.jogador.nome : j.nome;
-                    console.log(`${i+1}º lugar: ${nomeJogador} (${j.pontos} pontos)`);
-                });
-
-                // Processar cada posição do resultado ordenado
-                resultadosOrdenados.forEach((jogador, posicao) => {
-                    // Pegar o nome do jogador baseado no formato
-                    const nomeJogador = jogador.jogador ? jogador.jogador.nome : jogador.nome;
-
-                    // Ignorar jogador BYE ou undefined
-                    if (!nomeJogador || nomeJogador === 'BYE' || nomeJogador === 'undefined') return;
-
-                    // Calcular pontos baseado na posição
-                    let pontosCopa = 0;
-                    switch (posicao) {
-                        case 0: pontosCopa = 6; break;  // 1º lugar
-                        case 1: pontosCopa = 4; break;  // 2º lugar
-                        case 2: pontosCopa = 3; break;  // 3º lugar
-                        case 3: pontosCopa = 2; break;  // 4º lugar
-                        case 4: pontosCopa = 1; break;  // 5º lugar
-                        default: pontosCopa = 0;        // 6º lugar ou pior
-                    }
-
-                    // Somar os pontos do torneio
-                    const pontosTorneio = jogador.pontos || 0;
-                    const pontosTotais = pontosCopa + pontosTorneio;
-
-                    // Adicionar pontos ao jogador na classificação geral
-                    const pontosAtuais = classificacaoGeral.get(nomeJogador) || 0;
-                    const novosPontos = pontosAtuais + pontosTotais;
-                    classificacaoGeral.set(nomeJogador, novosPontos);
-                    
-                    console.log(`${nomeJogador}: ${pontosCopa} pontos posição + ${pontosTorneio} pontos torneio = ${pontosTotais} (${torneio.nome}), total agora: ${novosPontos}`);
-                });
-            } else {
-                console.log(`Torneio ${torneio.nome} não tem resultados ou formato inválido`);
-            }
-        }
-
-        console.log('\nPontuação final por jogador:');
-        classificacaoGeral.forEach((pontos, nome) => {
-            console.log(`${nome}: ${pontos} pontos totais`);
-        });
-
-        // Criar array ordenado da classificação
-        const classificacaoArray = Array.from(classificacaoGeral.entries())
-            .filter(([nome]) => nome && nome !== 'BYE' && nome !== 'undefined')
-            .map(([nome, pontos]) => ({ nome, pontos }))
-            .sort((a, b) => b.pontos - a.pontos);
-
-        // Exibir resultados
-        exibirClassificacao(classificacaoArray);
-        exibirTorneios(torneiosDaCopa);
+        exibirClassificacao(classificacao);
+        exibirTorneios(torneiosDoAno);
 
     } catch (error) {
         console.error('Erro ao atualizar resultados:', error);
