@@ -23,6 +23,10 @@ let ratingChart = null;
 let jogadores = [];
 let partidasDoJogadorAtual = [];
 
+// Cada carregamento ganha um número; se o usuário trocar de jogador antes de uma leitura
+// terminar, o resultado atrasado é descartado e não sobrescreve o jogador escolhido depois.
+let ultimoCarregamento = 0;
+
 // Referência ao Firestore
 const db = firebase.firestore();
 
@@ -67,9 +71,14 @@ async function loadPlayerHistory() {
         return;
     }
 
+    const carregamento = ++ultimoCarregamento;
     try {
-        // Buscar informações do jogador
-        const playerDoc = await db.collection('players').doc(playerId).get();
+        // Buscar informações do jogador e todos os torneios (uma única vez)
+        const [playerDoc, tournamentsSnapshot] = await Promise.all([
+            db.collection('players').doc(playerId).get(),
+            db.collection('torneio').get()
+        ]);
+        if (carregamento !== ultimoCarregamento) return; // outro jogador foi escolhido nesse meio-tempo
         const playerData = playerDoc.data();
 
         // Exibir informações básicas do jogador
@@ -78,8 +87,6 @@ async function loadPlayerHistory() {
         maxRating.textContent = playerData.Rating;
         playerInfo.style.display = 'block';
 
-        // Buscar todos os torneios uma única vez
-        const tournamentsSnapshot = await db.collection('torneio').get();
         const todosTorneios = tournamentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Copa do ano e resumo das partidas

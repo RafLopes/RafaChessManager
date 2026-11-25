@@ -119,6 +119,20 @@ test('posição, etapas, vitórias e pódios', () => {
     });
 });
 
+test('nome com duas grafias: números da mesma linha da Copa', () => {
+    // Como na Copa 2025: "Hudson Hilário " e "Hudson Hilário" viram duas linhas na página da Copa
+    const copa = Copa.calcular([
+        etapa('1', '2026-03-01', ['Hudson ', 'X']),
+        etapa('2', '2026-03-08', ['Hudson ', 'X']),
+        etapa('3', '2026-03-15', ['X', 'Y', 'Z', 'Hudson'])
+    ], 2026);
+    const linha = copa.classificacao.findIndex(j => j.nome.trim() === 'Hudson');
+    assert.equal(copa.classificacao[linha].nome, 'Hudson ');
+    assert.deepEqual(E.copaDoJogador(copa, 'Hudson'), {
+        posicao: linha + 1, pontos: copa.classificacao[linha].pontos, etapas: 2, vitorias: 2, podios: 2
+    });
+});
+
 test('jogador fora da Copa', () => {
     const copa = Copa.calcular([etapa('1', '2026-03-01', ['X', 'Y'])], 2026);
     assert.equal(E.copaDoJogador(copa, 'João'), null);

@@ -90,10 +90,13 @@
         const indice = resultadoCopa.classificacao.findIndex(j => mesmoNome(j.nome));
         if (indice === -1) return null;
 
+        // Etapas, vitórias e pódios contam só o nome exato dessa linha da Copa, para os números
+        // baterem com os pontos dela (um nome gravado com e sem espaço vira duas linhas na Copa).
+        const nomeDaLinha = resultadoCopa.classificacao[indice].nome;
         let etapas = 0, vitorias = 0, podios = 0;
         for (const torneio of resultadoCopa.torneiosDoAno) {
             if (!Array.isArray(torneio.Resultado)) continue;
-            const posicao = torneio.Resultado.findIndex(j => mesmoNome(j.jogador ? j.jogador.nome : j.nome));
+            const posicao = torneio.Resultado.findIndex(j => (j.jogador ? j.jogador.nome : j.nome) === nomeDaLinha);
             if (posicao === -1) continue;
             etapas++;
             if (posicao === 0) vitorias++;
