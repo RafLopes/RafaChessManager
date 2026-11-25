@@ -12,8 +12,16 @@ const statsInfo = document.getElementById('statsInfo');
 const victories = document.getElementById('victories');
 const draws = document.getElementById('draws');
 const losses = document.getElementById('losses');
+const copaJogador = document.getElementById('copaJogador');
+const anoCopaJogador = document.getElementById('anoCopaJogador');
+const resumoPartidas = document.getElementById('resumoPartidas');
+const jogosConfronto = document.getElementById('jogosConfronto');
 
 let ratingChart = null;
+
+// Dados lidos uma vez e reaproveitados (lista de jogadores e partidas do jogador aberto)
+let jogadores = [];
+let partidasDoJogadorAtual = [];
 
 // Referência ao Firestore
 const db = firebase.firestore();
@@ -21,26 +29,17 @@ const db = firebase.firestore();
 // Carregar lista de jogadores quando a página carregar
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const db = firebase.firestore();
         const snapshot = await db.collection('players').get();
-        
+
         // Limpar opções existentes
         playerSelect.innerHTML = '<option value="">Selecione um jogador</option>';
-        
+
         // Coletar jogadores e ordenar alfabeticamente
-        const players = [];
-        snapshot.forEach(doc => {
-            players.push({
-                id: doc.id,
-                nome: doc.data().Nome
-            });
-        });
-        
-        // Ordenar alfabeticamente por nome
-        players.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-        
+        jogadores = snapshot.docs.map(doc => ({ id: doc.id, nome: doc.data().Nome }));
+        jogadores.sort((a, b) => String(a.nome).localeCompare(String(b.nome), 'pt-BR'));
+
         // Adicionar jogadores ao select
-        players.forEach(player => {
+        jogadores.forEach(player => {
             const option = document.createElement('option');
             option.value = player.id;
             option.textContent = player.nome;
@@ -50,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Carrega automaticamente ao escolher o jogador ou ao vir de um link (?id=)
         playerSelect.addEventListener('change', () => { if (playerSelect.value) loadPlayerHistory(); });
         const idUrl = new URLSearchParams(window.location.search).get('id');
-        if (idUrl && players.some(p => p.id === idUrl)) {
+        if (idUrl && jogadores.some(p => p.id === idUrl)) {
             playerSelect.value = idUrl;
             loadPlayerHistory();
         }
@@ -69,8 +68,6 @@ async function loadPlayerHistory() {
     }
 
     try {
-        const db = firebase.firestore();
-        
         // Buscar informações do jogador
         const playerDoc = await db.collection('players').doc(playerId).get();
         const playerData = playerDoc.data();
@@ -81,14 +78,20 @@ async function loadPlayerHistory() {
         maxRating.textContent = playerData.Rating;
         playerInfo.style.display = 'block';
 
-        // Buscar todos os torneios
+        // Buscar todos os torneios uma única vez
         const tournamentsSnapshot = await db.collection('torneio').get();
+        const todosTorneios = tournamentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Copa do ano e resumo das partidas
+        const anoAtual = new Date().getFullYear();
+        exibirCopa(EstatisticasJogador.copaDoJogador(Copa.calcular(todosTorneios, anoAtual), playerData.Nome), anoAtual);
+        partidasDoJogadorAtual = EstatisticasJogador.partidasDoJogador(todosTorneios, playerId);
+        exibirResumoPartidas(EstatisticasJogador.resumoPartidas(partidasDoJogadorAtual));
+
         const tournaments = [];
 
         // Processar cada torneio
-        tournamentsSnapshot.forEach(doc => {
-            const torneioData = doc.data();
-            
+        todosTorneios.forEach(torneioData => {
             // Verificar se o jogador está em qualquer uma das listas
             const jogadorNoTorneio = torneioData.jogadores?.some(j => j.id === playerId);
             const resultadoJogador = torneioData.Resultado?.find(r => r.id === playerId || r.jogador?.id === playerId);
@@ -97,7 +100,7 @@ async function loadPlayerHistory() {
                 // Encontrar o rating inicial do jogador
                 const jogadorInfo = torneioData.jogadores?.find(j => j.id === playerId);
                 const ratingInicial = jogadorInfo ? jogadorInfo.rating : 0;
-                
+
                 // Encontrar a posição correta do jogador nos resultados
                 let posicao = '-';
                 if (torneioData.Resultado) {
@@ -106,15 +109,15 @@ async function loadPlayerHistory() {
                         posicao = index + 1;
                     }
                 }
-                
+
                 tournaments.push({
-                    id: doc.id,
+                    id: torneioData.id,
                     nome: torneioData.nome,
                     data: torneioData.data,
                     posicao: posicao,
                     variacaoRating: resultadoJogador?.variacaoRating || 0,
                     ratingInicial: ratingInicial,
-                    ratingFinal: resultadoJogador?.rating || ratingInicial  // NOVO: adicionar rating final do banco
+                    ratingFinal: resultadoJogador?.rating || ratingInicial  // rating final gravado no banco
                 });
             }
         });
@@ -125,17 +128,9 @@ async function loadPlayerHistory() {
         // Ordenar torneios por data (mais antigo primeiro para o gráfico)
         tournaments.sort((a, b) => new Date(a.data) - new Date(b.data));
 
-        // Preparar dados para o gráfico
-        const labels = [];
-        const ratings = [];
-
-        if (tournaments.length > 0) {
-            // Usar os rating finais reais do banco (não recalcular!)
-            tournaments.forEach(torneio => {
-                labels.push(formatDate(torneio.data));
-                ratings.push(Number(torneio.ratingFinal));
-            });
-        }
+        // Preparar dados para o gráfico (usa os ratings finais gravados, sem recalcular)
+        const labels = tournaments.map(torneio => formatDate(torneio.data));
+        const ratings = tournaments.map(torneio => Number(torneio.ratingFinal));
 
         // Atualizar ou criar o gráfico
         updateRatingChart(labels, ratings);
@@ -152,12 +147,13 @@ async function loadPlayerHistory() {
             maxRatingFound = Math.max(maxRatingFound, ratingFinal);
 
             const tr = document.createElement('tr');
-            const classePos = typeof torneio.posicao === 'number' && torneio.posicao <= 3 ? `pos-${torneio.posicao}` : '';
+            const temPosicao = typeof torneio.posicao === 'number';
+            const classePos = temPosicao && torneio.posicao <= 3 ? `pos-${torneio.posicao}` : '';
             const classeDelta = torneio.variacaoRating > 0 ? 'delta-pos' : torneio.variacaoRating < 0 ? 'delta-neg' : '';
             tr.innerHTML = `
                 <td class="fw-semibold" style="min-width: 12rem;"><a href="VisualizarTorneio.html?id=${encodeURIComponent(torneio.id)}" class="text-decoration-none">${UI.escapar(torneio.nome)}</a></td>
                 <td class="text-nowrap">${formatDate(torneio.data)}</td>
-                <td><span class="pos-badge ${classePos}">${torneio.posicao}º</span></td>
+                <td>${temPosicao ? `<span class="pos-badge ${classePos}">${torneio.posicao}º</span>` : '<span class="text-body-secondary" title="Torneio em andamento">—</span>'}</td>
                 <td class="num">${torneio.ratingInicial}</td>
                 <td class="num ${classeDelta}">${torneio.variacaoRating > 0 ? '+' : ''}${torneio.variacaoRating}</td>
                 <td class="num fw-semibold">${ratingFinal}</td>
@@ -176,6 +172,48 @@ async function loadPlayerHistory() {
         console.error('Erro ao carregar histórico:', error);
         alert('Erro ao carregar histórico do jogador.');
     }
+}
+
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+// Bloco "Copa do ano": mesmos números da página da Copa
+function exibirCopa(copa, ano) {
+    anoCopaJogador.textContent = ano;
+    if (!copa) {
+        copaJogador.innerHTML = `<div class="text-body-secondary">Ainda não jogou etapas da Copa ${ano}.</div>`;
+        return;
+    }
+    copaJogador.innerHTML = `
+        <div class="d-flex align-items-center gap-3">
+            ${UI.badgePosicao(copa.posicao)}
+            <div>
+                <div class="stat-valor num">${UI.escapar(copa.pontos)} <span class="fs-6 fw-normal text-body-secondary">pts</span></div>
+                <div class="small text-body-secondary">${copa.posicao}º lugar · ${plural(copa.etapas, 'etapa', 'etapas')} · ${plural(copa.vitorias, 'etapa vencida', 'etapas vencidas')} · ${plural(copa.podios, 'pódio', 'pódios')}</div>
+            </div>
+        </div>
+        <a href="ResultadoCopa.html" class="small d-inline-block mt-2 text-decoration-none">Ver a Copa <i class="bi bi-arrow-right"></i></a>
+    `;
+}
+
+const linhaVED = c => `${c.v}V ${c.e}E ${c.d}D`;
+
+// Bloco "Partidas": todas as partidas presenciais do jogador
+function exibirResumoPartidas(r) {
+    if (!r.partidas) {
+        resumoPartidas.innerHTML = '<div class="text-body-secondary">Nenhuma partida registrada.</div>';
+        return;
+    }
+    resumoPartidas.innerHTML = `
+        <div class="row g-2 text-center">
+            <div class="col-4"><div class="border rounded-3 stat-card stat-win p-2"><div class="stat-valor num">${r.vitorias}</div><div class="stat-rotulo">Vitórias</div></div></div>
+            <div class="col-4"><div class="border rounded-3 stat-card stat-draw p-2"><div class="stat-valor num">${r.empates}</div><div class="stat-rotulo">Empates</div></div></div>
+            <div class="col-4"><div class="border rounded-3 stat-card stat-loss p-2"><div class="stat-valor num">${r.derrotas}</div><div class="stat-rotulo">Derrotas</div></div></div>
+        </div>
+        <div class="small mt-2">
+            <span class="fw-semibold">${r.aproveitamento}% de aproveitamento</span> em ${plural(r.partidas, 'partida', 'partidas')}
+        </div>
+        <div class="small text-body-secondary"><i class="bi bi-square"></i> Brancas: ${linhaVED(r.brancas)} · <i class="bi bi-square-fill"></i> Pretas: ${linhaVED(r.pretas)}</div>
+    `;
 }
 
 function updateRatingChart(labels, ratings) {
@@ -240,193 +278,58 @@ function formatDate(dateString) {
     return UI.formatarData(dateString);
 }
 
-// Função para carregar adversários no select
+// Preenche o select de adversários com a lista já carregada
 function loadOpponents(currentPlayerId) {
     opponentSelect.innerHTML = '<option value="">Selecione um jogador</option>';
-    
-    db.collection('players').get().then(snapshot => {
-        snapshot.docs
-            .filter(doc => doc.id !== currentPlayerId)
-            .sort((a, b) => String(a.data().Nome).localeCompare(String(b.data().Nome), 'pt-BR'))
-            .forEach(doc => {
-                const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = doc.data().Nome;
-                opponentSelect.appendChild(option);
-            });
-    });
-}
-
-// Função para calcular estatísticas contra um adversário específico
-async function calculateHeadToHead(playerId, opponentId) {
-    console.log(`Calculando estatísticas: Jogador ${playerId} vs Oponente ${opponentId}`);
-    
-    const stats = {
-        victories: 0,
-        draws: 0,
-        losses: 0
-    };
-
-    try {
-        const tournamentsSnapshot = await db.collection('torneio').get();
-        
-        // Para debug
-        console.log(`Total de torneios encontrados: ${tournamentsSnapshot.size}`);
-        
-        tournamentsSnapshot.forEach(doc => {
-            const torneioData = doc.data();
-            console.log(`Analisando torneio: ${torneioData.nome || 'Sem nome'}`);
-            
-            // Verificar nas partidas antigas (formato antigo)
-            if (torneioData.Partidas && Array.isArray(torneioData.Partidas)) {
-                console.log(`Torneio tem ${torneioData.Partidas.length} partidas no formato antigo`);
-                
-                torneioData.Partidas.forEach(partida => {
-                    // Extrair IDs dos jogadores com segurança
-                    let brancasId = null;
-                    let pretasId = null;
-                    
-                    // Verificar diferentes formatos possíveis
-                    if (typeof partida.brancas === 'object' && partida.brancas !== null) {
-                        brancasId = partida.brancas.id;
-                    } else if (typeof partida.brancas === 'string') {
-                        brancasId = partida.brancas;
-                    }
-                    
-                    if (typeof partida.pretas === 'object' && partida.pretas !== null) {
-                        pretasId = partida.pretas.id;
-                    } else if (typeof partida.pretas === 'string') {
-                        pretasId = partida.pretas;
-                    }
-                    
-                    // Verificar se a partida é entre os jogadores em questão
-                    if ((brancasId === playerId && pretasId === opponentId) || 
-                        (brancasId === opponentId && pretasId === playerId)) {
-                        
-                        console.log(`Encontrada partida entre os jogadores: ${brancasId} vs ${pretasId}, resultado: ${partida.resultado}`);
-                        
-                        const isPlayerWhite = brancasId === playerId;
-                        
-                        if (partida.resultado === '1-0') {
-                            isPlayerWhite ? stats.victories++ : stats.losses++;
-                        } else if (partida.resultado === '0-1') {
-                            isPlayerWhite ? stats.losses++ : stats.victories++;
-                        } else if (partida.resultado === '½-½' || partida.resultado === '1/2-1/2') {
-                            stats.draws++;
-                        }
-                    }
-                });
-            }
-            
-            // Verificar no novo formato historicoPartidas
-            if (torneioData.historicoPartidas && typeof torneioData.historicoPartidas === 'object') {
-                console.log(`Torneio tem histórico de partidas no novo formato`);
-                
-                // Percorrer todas as rodadas
-                Object.keys(torneioData.historicoPartidas).forEach(rodadaKey => {
-                    const partidas = torneioData.historicoPartidas[rodadaKey];
-                    
-                    if (Array.isArray(partidas)) {
-                        console.log(`Rodada ${rodadaKey} tem ${partidas.length} partidas`);
-                        
-                        partidas.forEach(partida => {
-                            // Extrair IDs dos jogadores com segurança
-                            let brancasId = null;
-                            let pretasId = null;
-                            
-                            // Verificar diferentes formatos possíveis
-                            if (typeof partida.brancas === 'object' && partida.brancas !== null) {
-                                brancasId = partida.brancas.id;
-                            } else if (typeof partida.brancas === 'string') {
-                                brancasId = partida.brancas;
-                            }
-                            
-                            if (typeof partida.pretas === 'object' && partida.pretas !== null) {
-                                pretasId = partida.pretas.id;
-                            } else if (typeof partida.pretas === 'string') {
-                                pretasId = partida.pretas;
-                            }
-                            
-                            // Verificar se a partida é entre os jogadores em questão
-                            if ((brancasId === playerId && pretasId === opponentId) || 
-                                (brancasId === opponentId && pretasId === playerId)) {
-                                
-                                console.log(`Encontrada partida entre os jogadores: ${brancasId} vs ${pretasId}, resultado: ${partida.resultado}`);
-                                
-                                const isPlayerWhite = brancasId === playerId;
-                                
-                                if (partida.resultado === '1-0') {
-                                    isPlayerWhite ? stats.victories++ : stats.losses++;
-                                } else if (partida.resultado === '0-1') {
-                                    isPlayerWhite ? stats.losses++ : stats.victories++;
-                                } else if (partida.resultado === '1/2-1/2' || partida.resultado === '½-½') {
-                                    stats.draws++;
-                                }
-                            }
-                        });
-                    }
-                });
-            }
+    statsInfo.style.display = 'none';
+    jogadores
+        .filter(j => j.id !== currentPlayerId)
+        .forEach(j => {
+            const option = document.createElement('option');
+            option.value = j.id;
+            option.textContent = j.nome;
+            opponentSelect.appendChild(option);
         });
-
-        console.log('Estatísticas calculadas:', stats);
-        return stats;
-    } catch (error) {
-        console.error('Erro ao calcular estatísticas:', error);
-        // Retornar estatísticas vazias em caso de erro para evitar quebrar a interface
-        return { victories: 0, draws: 0, losses: 0 };
-    }
 }
 
-// Adicionar evento para mudança de adversário
-opponentSelect.addEventListener('change', async () => {
-    const playerId = playerSelect.value;
+const ROTULO_RESULTADO = {
+    V: '<span class="badge text-bg-success">Vitória</span>',
+    E: '<span class="badge text-bg-secondary">Empate</span>',
+    D: '<span class="badge text-bg-danger">Derrota</span>'
+};
+
+// Lista dos jogos do confronto direto, do mais recente para o mais antigo
+function exibirJogosConfronto(jogos) {
+    if (!jogos.length) {
+        jogosConfronto.innerHTML = '<div class="small text-body-secondary">Nunca se enfrentaram em torneios registrados.</div>';
+        return;
+    }
+    jogosConfronto.innerHTML = `
+        <div class="small fw-semibold mb-1">${plural(jogos.length, 'jogo', 'jogos')}</div>
+        <ul class="list-group list-group-flush small" style="max-height: 22rem; overflow-y: auto;">
+            ${jogos.map(j => `
+                <li class="list-group-item px-0 d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                        <a href="VisualizarTorneio.html?id=${encodeURIComponent(j.torneioId)}" class="text-decoration-none">${UI.escapar(j.torneioNome)}</a>
+                        <div class="text-body-secondary">${formatDate(j.data)}${j.rodada ? ` · rodada ${j.rodada}` : ''} · ${j.cor === 'brancas' ? '<i class="bi bi-square"></i> brancas' : '<i class="bi bi-square-fill"></i> pretas'}</div>
+                    </div>
+                    ${ROTULO_RESULTADO[j.resultado]}
+                </li>`).join('')}
+        </ul>
+    `;
+}
+
+// Confronto direto: usa as partidas já carregadas do jogador
+opponentSelect.addEventListener('change', () => {
     const opponentId = opponentSelect.value;
-    
-    if (playerId && opponentId) {
-        try {
-            console.log(`Calculando estatísticas para ${playerId} vs ${opponentId}`);
-            const stats = await calculateHeadToHead(playerId, opponentId);
-            
-            victories.textContent = stats.victories;
-            draws.textContent = stats.draws;
-            losses.textContent = stats.losses;
-            
-            statsInfo.style.display = 'block';
-        } catch (error) {
-            console.error('Erro ao carregar estatísticas:', error);
-            alert('Erro ao carregar estatísticas contra o adversário.');
-            // Limpar estatísticas em caso de erro
-            victories.textContent = '0';
-            draws.textContent = '0';
-            losses.textContent = '0';
-        }
-    } else {
+    if (!playerSelect.value || !opponentId) {
         statsInfo.style.display = 'none';
+        return;
     }
+    const c = EstatisticasJogador.confronto(partidasDoJogadorAtual, opponentId);
+    victories.textContent = c.vitorias;
+    draws.textContent = c.empates;
+    losses.textContent = c.derrotas;
+    exibirJogosConfronto(c.jogos);
+    statsInfo.style.display = 'block';
 });
-
-function displayFinalResults(resultados, jogadores) {
-    const tbody = document.getElementById('resultados-tbody');
-    tbody.innerHTML = '';
-
-    resultados.forEach((resultado, index) => {
-        // Encontrar o jogador na lista de jogadores do torneio
-        const jogadorTorneio = jogadores.find(j => j.id === resultado.id);
-        const tr = document.createElement('tr');
-        
-        // Usar o rating do jogador do torneio
-        const ratingInicial = jogadorTorneio ? Number(jogadorTorneio.rating) : 0;
-        const ratingAtualizado = ratingInicial + Number(resultado.variacaoRating);
-        
-        tr.innerHTML = `
-            <td>${index + 1}º</td>
-            <td>${UI.escapar(resultado.nome)}</td>
-            <td>${UI.escapar(resultado.pontos)}</td>
-            <td>${ratingInicial}</td>
-            <td>${resultado.variacaoRating > 0 ? '+' : ''}${resultado.variacaoRating}</td>
-            <td>${ratingAtualizado}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
